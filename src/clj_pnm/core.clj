@@ -25,7 +25,8 @@
 (defn read-file
   [f]
   (with-open [reader (io/reader f)]
-    (into [] (remove #(or (comment-line? %) (empty? %)) (line-seq reader)))))
+    (into [] (remove #(or (empty? %)
+                          (st/blank? %)) (line-seq reader)))))
 
 (defn normalize-whitespace
   [v]
@@ -34,6 +35,14 @@
 (defn tokenize
   [v]
   (flatten (map split-on-space-char v)))
+
+(defn remove-comments
+  [v]
+  (remove comment-line? v))
+
+(defn get-comments
+  [v]
+  (map (comp st/trim #(st/replace % "#" "")) (filter comment-line? v)))
 
 (defmulti parse
           (fn [v] (-> v
@@ -100,10 +109,11 @@
   [v]
   (throw (Exception. (str "Unsupported file format " (first v) "!"))))
 
-(defn read-ppm
-  [ppm]
-  (-> ppm
+(defn read-pnm
+  [pnm]
+  (-> pnm
       read-file
+      remove-comments
       normalize-whitespace
       tokenize
       parse))
@@ -112,13 +122,9 @@
 ;; Writing
 
 (defn writeln
-  [^Writer writer ^String l]
-  (.write writer (str l "\n")))
-
-(defn writeln-not-empty
-  [^Writer writer l]
-  (when l
-    (.write writer (str l "\n"))))
+  [^Writer writer ^String line]
+  (when line
+    (.write writer (str line "\n"))))
 
 (defn write-comments
   [^Writer writer comments]
@@ -128,19 +134,20 @@
 
 (defn write-map
   [^Writer writer m]
-  (doseq [l m]
-    (writeln writer (st/join " " (flatten l)))))
+  (when m
+    (doseq [l m]
+      (writeln writer (st/join " " (flatten l))))))
 
-(defn write-ppm
-  ([ppm file-name] (write-ppm ppm file-name nil))
-  ([ppm file-name comments]
+(defn write-pnm
+  ([pnm file-name] (write-pnm pnm file-name nil))
+  ([pnm file-name comments]
    (let [f (io/file file-name)]
      (with-open [writer (io/writer (io/file file-name) :append true)]
        (doto writer
-         (writeln (-> ppm :type name st/upper-case))
-         (writeln (-> ppm :width))
-         (writeln (-> ppm :height))
-         (writeln-not-empty (-> ppm :max-value))
+         (writeln (some-> pnm :type name st/upper-case))
+         (writeln (-> pnm :width))
+         (writeln (-> pnm :height))
+         (writeln (-> pnm :max-value))
          (write-comments comments)
-         (write-map (-> ppm :map)))
+         (write-map (-> pnm :map)))
        f))))
