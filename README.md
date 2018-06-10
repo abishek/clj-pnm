@@ -1,5 +1,7 @@
 # clj-pnm
 
+[![Build Status](https://travis-ci.org/theparanoidtimes/clj-pnm.svg?branch=master)](https://travis-ci.org/theparanoidtimes/clj-pnm)
+
 A Clojure library for reading and writing Netpbm files.
 
 Reads a *pnm* file into a Clojure structure. That same structure
