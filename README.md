@@ -29,7 +29,7 @@ P1
 (require '[clj-pnm.core :as pnm])
 => nil
 
-(pnm/read-pnm (io/file "test.pnm"))
+(pnm/read-pnm (io/file "test.pbm"))
 => {:type :p1, :width 2, :height 2, :map [[1 1] [1 1]]}
 ```
 
