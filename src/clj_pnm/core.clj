@@ -4,15 +4,42 @@
   (:import (java.io Writer)))
 
 
-;; Reading
+;; String manipulation
 
-(defn comment-line?
-  [line]
-  (st/starts-with? line "#"))
+(defn starts-with?
+  [s c]
+  (st/starts-with? s c))
+
+(defn split
+  [s r]
+  (st/split s r))
+
+(defn trim
+  [s]
+  (st/trim s))
+
+(defn rplc
+  [s f r]
+  (st/replace s f r))
+
+(defn blank?
+  [s]
+  (st/blank? s))
+
+(defn lower-case
+  [s]
+  (st/lower-case s))
+
+(defn read-str
+  [s]
+  (read-string s))
 
 (defn split-on-space-char
   [s]
-  (st/split s #"\s"))
+  (split s #"\s"))
+
+
+;; Reading
 
 (defn third
   [v]
@@ -22,15 +49,19 @@
   [v]
   (nth v 3))
 
+(defn comment-line?
+  [line]
+  (starts-with? line "#"))
+
 (defn read-file
   [f]
   (with-open [reader (io/reader f)]
     (into [] (remove #(or (empty? %)
-                          (st/blank? %)) (line-seq reader)))))
+                          (blank? %)) (line-seq reader)))))
 
 (defn normalize-whitespace
   [v]
-  (mapv (fn [s] (st/trim (st/replace s #"\s+" " "))) v))
+  (mapv (fn [s] (trim (rplc s #"\s+" " "))) v))
 
 (defn tokenize
   [v]
@@ -42,25 +73,25 @@
 
 (defn get-comments
   [v]
-  (map (comp st/trim #(st/replace % "#" "")) (filter comment-line? v)))
+  (map (comp trim #(rplc % "#" "")) (filter comment-line? v)))
 
 (defmulti parse
-          (fn [v] (-> v
-                      first
-                      st/lower-case
-                      keyword)))
+  (fn [v] (-> v
+             first
+             lower-case
+             keyword)))
 
 (defmethod parse :p1
   [v]
-  (let [w (read-string (second v))
-        h (read-string (third v))
+  (let [w (read-str (second v))
+        h (read-str (third v))
         m (loop [i h
                  r []
                  s (drop 3 v)]
             (if (zero? i)
               r
               (recur (dec i)
-                     (conj r (mapv read-string (take w s)))
+                     (conj r (mapv read-str (take w s)))
                      (drop w s))))]
     {:type   :p1
      :width  w
@@ -69,16 +100,16 @@
 
 (defmethod parse :p2
   [v]
-  (let [w (read-string (second v))
-        h (read-string (third v))
-        mv (read-string (fourth v))
+  (let [w (read-str (second v))
+        h (read-str (third v))
+        mv (read-str (fourth v))
         m (loop [i h
                  r []
                  s (drop 4 v)]
             (if (zero? i)
               r
               (recur (dec i)
-                     (conj r (mapv read-string (take w s)))
+                     (conj r (mapv read-str (take w s)))
                      (drop w s))))]
     {:type      :p2
      :width     w
@@ -88,16 +119,16 @@
 
 (defmethod parse :p3
   [v]
-  (let [w (read-string (second v))
-        h (read-string (third v))
-        mv (read-string (fourth v))
+  (let [w (read-str (second v))
+        h (read-str (third v))
+        mv (read-str (fourth v))
         m (loop [i h
                  r []
                  s (drop 4 v)]
             (if (zero? i)
               r
               (recur (dec i)
-                     (conj r (into [] (partition 3 (map read-string (take (* w 3) s)))))
+                     (conj r (into [] (partition 3 (map read-str (take (* w 3) s)))))
                      (drop (* w 3) s))))]
     {:type      :p3
      :width     w
@@ -107,7 +138,7 @@
 
 (defmethod parse :default
   [v]
-  (throw (Exception. (str "Unsupported file format " (first v) "!"))))
+  :invalid-file-format)
 
 (defn read-pnm
   [pnm]
