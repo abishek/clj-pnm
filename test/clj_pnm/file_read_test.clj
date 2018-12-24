@@ -84,11 +84,11 @@
 (deftest read-comments-test
   (testing "read one comment line"
     (is (= '("This is an example bitmap of the letter \"J\"")
-           (get-comments (read-file "./test/resources/j.pbm")))))
+           (get-comments (read-lines (io/file "./test/resources/j.pbm"))))))
   (testing "read multiple comment lines"
     (is (= '("The part above is the header"
-              "\"P3\" means this is a RGB color image in ASCII"
-              "\"3 2\" is the width and height of the image in pixels"
-              "\"255\" is the maximum value for each color"
-              "The part below is image data: RGB triplets")
-           (get-comments (read-file "./test/resources/rgb.ppm"))))))
+             "\"P3\" means this is a RGB color image in ASCII"
+             "\"3 2\" is the width and height of the image in pixels"
+             "\"255\" is the maximum value for each color"
+             "The part below is image data: RGB triplets")
+           (get-comments (read-lines (io/file "./test/resources/rgb.ppm")))))))
