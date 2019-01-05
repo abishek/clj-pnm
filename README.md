@@ -2,116 +2,132 @@
 
 [![Build Status](https://travis-ci.org/theparanoidtimes/clj-pnm.svg?branch=master)](https://travis-ci.org/theparanoidtimes/clj-pnm)
 
-A Clojure library for reading and writing Netpbm files.
+A Clojure(Script) library for reading and writing Netpbm format.
+Currently supports *p1* (*.pbm*), *p2* (*.pgm*) and *p3* (*.ppm*) formats.
 
-Reads a *pnm* file into a Clojure structure. That same structure
-can be used to write a *pnm* file. Currently supports *p1* (*.pbm*),
-*p2* (*.pgm*) and *p3* (*.ppm*) files.
+The library is in the proof of concept stage and there are a couple of
+features that are still missing. The format ignores whitespace, however *clj-pnm*
+requires that characters are separated. Binary formats, *P4*, *P5* and *P6* are
+not supported. [*pam*](http://netpbm.sourceforge.net/doc/pam.html) format is also
+not supported.
 
-Good explanation of the format and the documents that are used as guides
-for this library can be found [here](http://netpbm.sourceforge.net/doc/ppm.html)
+Good explanation of the format and the resources that are used as guides
+for this library can be found [here](http://netpbm.sourceforge.net/doc/index.html)
 and [here](https://en.wikipedia.org/wiki/Netpbm_format).
-
-The library is still in its early stages, so any feedback and support is
-welcome.
 
 ## Usage
 
-Read a *test.pbm* file
-
-```
-P1
-2
-2
-1 1
-1 1
-```
-
+Read the *pbm* format:
 ``` clojure
 (require '[clj-pnm.core :as pnm])
 => nil
 
-(pnm/read-pnm (io/file "test.pbm"))
+(def pbm
+"P1
+2
+2
+1 1
+1 1")
+=> #'user/pbm
+
+(pnm/read-pnm pbm)
 => {:type :p1, :width 2, :height 2, :map [[1 1] [1 1]]}
 ```
 
-Read a *test.pgm* file
-
-```
-P2
+Read the *pgm* format:
+```clojure
+(def pgm
+"P2
 3
 2
 4
 1 2 3
-4 3 2
-```
+4 3 2")
+=> #'user/pgm
 
-``` clojure
-(pnm/read-pnm (io/file "test.pgm"))
+(pnm/read-pnm pgm)
 => {:type :p2, :width 3, :height 2, :max-value 4, :map [[1 2 3] [4 3 2]]}
 ```
 
-Finally, read a *test.ppm* file
-
-```
-P3
+And finally, read the *ppm* format:
+```clojure
+(def ppm
+"P3
 2
 2
 255
 255 0 255 128 52 123
-0 0 0 45 45 45
-```
+0 0 0 45 45 45")
+=> #'user/ppm
 
-``` clojure
-(pnm/read-pnm (io/file "test.ppm"))
+(pnm/read-pnm ppm)
 => {:type :p3
-    :width 2
-    :height 2
-    :max-value 255
-    :map [[(255 0 255) (128 52 123)]
-          [(0 0 0) (45 45 45)]]} ;; prettified
+:width 2
+:height 2
+:max-value 255
+:map [[(255 0 255) (128 52 123)]
+[(0 0 0) (45 45 45)]]} ; prettified
 ```
 
-It can extract comments if necessary
-
-```
-P1
+You can extract comments if necessary:
+```clojure
+(def pbm-with-comments
+"P1
 1
 1
 # A comment
 # Another comment
-1
+1")
+=> #'user/pbm-with-comments
+
+(pnm/get-comments (pnm/read-lines pbm-with-comments))
+=> ("A comment" "Another comment")
 ```
 
+Clojure version of *clj-pnm* can work with files. To read a *pnm* file
+you simply pass a file to `read-pnm` function:
 ``` clojure
-(pnm/get-comments (pnm/read-file (io/file "comment.pbm")))
-=> ("A comment" "Another comment")
+(require '[clojure.java.io :as io])
+=> nil
+
+(slurp (io/file "test.pgm"))
+=> P2
+3
+2
+4
+1 2 3
+4 5 6 ; prettified
+
+(pnm/read-pnm (io/file "test.pgm"))
+=> {:type :p2, :width 3, :height 2, :max-value 4, :map [[1 2 3] [4 5 6]]}
 ```
 
 Writing a file is just a matter of passing a map like the ones explained
 above. It can include comments also which are always written after the header part.
-
 ``` clojure
 (pnm/write-pnm {:type :p1 :width 1 :height 1 :map [[1]]} "out.pbm")
 => ...out.pbm file...
 
 (slurp *1)
 => "P1
-    1
-    1
-    1" ;; prettified
+1
+1
+1" ;prettified
 
-(pnm/write-pnm {:type :p3 :width 1 :height 1 :max-value 255:map [[1]]} "out.ppm", #{"A comment" "Another comment"})
+(pnm/write-pnm
+{:type :p3 :width 1 :height 1 :max-value 255 :map [[1]]}
+"out.ppm"
+#{"A comment" "Another comment"})
 => ...out.ppm file...
 
 (slurp *1)
 => "P3
-    1
-    1
-    255
-    # Another comment
-    # A comment
-    255 255 255" ;; prettified
+1
+1
+255
+# Another comment
+# A comment
+255 255 255" ; prettified
 ```
 
 ## License
