@@ -14,7 +14,9 @@
 
 (defn comment-line?
   [line]
-  (st/starts-with? line "#"))
+  (-> line
+      st/trim
+      (st/starts-with? "#")))
 
 (defn split-on-space-char
   [s]
@@ -163,7 +165,7 @@
        ([pnm file-name] (write-pnm pnm file-name nil))
        ([pnm file-name comments]
         (let [f (io/file file-name)]
-          (with-open [writer (io/writer (io/file file-name) :append true)]
+          (with-open [writer (io/writer f :append true)]
             (doto writer
               (writeln (some-> pnm :type name st/upper-case))
               (writeln (-> pnm :width))
