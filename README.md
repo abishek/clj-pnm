@@ -7,7 +7,7 @@ Currently supports *p1* (*.pbm*), *p2* (*.pgm*) and *p3* (*.ppm*) formats.
 
 The library is in the proof of concept stage and there are a couple of
 features that are still missing. The format ignores whitespace, however *clj-pnm*
-requires that characters are separated. Binary formats, *P4*, *P5* and *P6* are
+requires that characters are separated. Binary formats, *p4*, *p5* and *p6* are
 not supported. [*pam*](http://netpbm.sourceforge.net/doc/pam.html) format is also
 not supported.
 
@@ -24,10 +24,10 @@ Read the *pbm* format:
 
 (def pbm
 "P1
-2
-2
-1 1
-1 1")
+ 2
+ 2
+ 1 1
+ 1 1")
 => #'user/pbm
 
 (pnm/read-pnm pbm)
@@ -38,11 +38,11 @@ Read the *pgm* format:
 ```clojure
 (def pgm
 "P2
-3
-2
-4
-1 2 3
-4 3 2")
+ 3
+ 2
+ 4
+ 1 2 3
+ 4 3 2")
 => #'user/pgm
 
 (pnm/read-pnm pgm)
@@ -53,31 +53,31 @@ And finally, read the *ppm* format:
 ```clojure
 (def ppm
 "P3
-2
-2
-255
-255 0 255 128 52 123
-0 0 0 45 45 45")
+ 2
+ 2
+ 255
+ 255 0 255 128 52 123
+ 0 0 0 45 45 45")
 => #'user/ppm
 
 (pnm/read-pnm ppm)
 => {:type :p3
-:width 2
-:height 2
-:max-value 255
-:map [[(255 0 255) (128 52 123)]
-[(0 0 0) (45 45 45)]]} ; prettified
+    :width 2
+    :height 2
+    :max-value 255
+    :map [[(255 0 255) (128 52 123)]
+          [(0 0 0) (45 45 45)]]} ; prettified
 ```
 
 You can extract comments if necessary:
 ```clojure
 (def pbm-with-comments
 "P1
-1
-1
-# A comment
-# Another comment
-1")
+ 1
+ 1
+ # A comment
+ # Another comment
+ 1")
 => #'user/pbm-with-comments
 
 (pnm/get-comments (pnm/read-lines pbm-with-comments))
@@ -92,11 +92,11 @@ you simply pass a file to `read-pnm` function:
 
 (slurp (io/file "test.pgm"))
 => P2
-3
-2
-4
-1 2 3
-4 5 6 ; prettified
+ 3
+ 2
+ 4
+ 1 2 3
+ 4 5 6 ; prettified
 
 (pnm/read-pnm (io/file "test.pgm"))
 => {:type :p2, :width 3, :height 2, :max-value 4, :map [[1 2 3] [4 5 6]]}
@@ -110,9 +110,9 @@ above. It can include comments also which are always written after the header pa
 
 (slurp *1)
 => "P1
-1
-1
-1" ;prettified
+ 1
+ 1
+ 1" ;prettified
 
 (pnm/write-pnm
 {:type :p3 :width 1 :height 1 :max-value 255 :map [[1]]}
@@ -122,12 +122,12 @@ above. It can include comments also which are always written after the header pa
 
 (slurp *1)
 => "P3
-1
-1
-255
-# Another comment
-# A comment
-255 255 255" ; prettified
+ 1
+ 1
+ 255
+ # Another comment
+ # A comment
+ 255 255 255" ; prettified
 ```
 
 ## License
