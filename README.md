@@ -1,7 +1,5 @@
 # clj-pnm
 
-[![Build Status](https://travis-ci.org/theparanoidtimes/clj-pnm.svg?branch=master)](https://travis-ci.org/theparanoidtimes/clj-pnm)
-
 A Clojure(Script) library for reading and writing Netpbm format.
 Currently supports *p1* (*.pbm*), *p2* (*.pgm*) and *p3* (*.ppm*) formats.
 
